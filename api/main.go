@@ -2,10 +2,11 @@ package main
 
 import (
 	"log"
-
+	"net/http"
 	"gorm.io/gorm"
-
+	"github.com/vercel/go-bridge/go/bridge"
 	"github.com/gin-gonic/gin"
+	
 	"nevacarwash.com/main/database"
 	"nevacarwash.com/main/handlers"
 	"nevacarwash.com/main/middleware"
@@ -30,6 +31,33 @@ func init() {
 		log.Println("Tables already exist. Skipping migrations")
 	}
 	db = database.GetDB()
+}
+
+func createRouter() *gin.Engine {
+	router := gin.Default()
+
+	// Load templates and static files
+	router.LoadHTMLGlob("templates/*")
+	router.Static("/static", "./static")
+
+	// Define routes
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "home.html", nil)
+	})
+
+	router.GET("/api/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+
+	return router
+}
+
+// Handler is the exported function Vercel uses as the entry point
+func handler(w http.ResponseWriter, r *http.Request) {
+    router := createRouter()
+    bridge.ServeHTTP(router, w, r) // Use Vercel's Go bridge to handle requests
 }
 
 func main() {
