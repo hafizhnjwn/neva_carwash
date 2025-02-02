@@ -14,11 +14,6 @@ type VehicleHandler struct {
 	service *services.VehicleService
 }
 
-type StatusVehicles struct {
-	Status   string                 // The status name (e.g., "Python", "Go").
-	Vehicles []repositories.Vehicle // The list of vehicles for this status.
-}
-
 func NewVehicleHandler(service *services.VehicleService) *VehicleHandler {
 	return &VehicleHandler{service: service}
 }
@@ -97,11 +92,11 @@ func (h *VehicleHandler) GetVehiclesByUsername(c *gin.Context) {
 	})
 }
 
-func (h *VehicleHandler) GetVehiclesByStatus(c *gin.Context) {
-	statuss := []string{"Proses", "Selesai"}
+func (h *VehicleHandler) GetVehiclesByProcess(c *gin.Context) {
+	process := []string{"Menunggu", "Proses", "Selesai"}
 
 	// Call the service to get the vehicles grouped by status
-	groupedVehicles, err := h.service.GetVehiclesByStatus(statuss)
+	groupedVehicles, err := h.service.GetVehiclesByProcess(process)
 	if err != nil {
 		// Handle error by showing it on the page
 		c.HTML(http.StatusInternalServerError, "list.html", gin.H{"error": err.Error()})
@@ -131,14 +126,19 @@ func (h *VehicleHandler) GetVehicleByID(c *gin.Context) {
 		isLoggedIn = true
 	}
 	c.HTML(http.StatusOK, "viewvehicle.html", gin.H{
-		"Type":      vehicle.Type,
-		"Username":  vehicle.User.Username,
-		"Status":    vehicle.Status,
-		"Contact":   vehicle.Contact,
-		"Plat":      vehicle.Plat,
-		"CreatedAt": vehicle.CreatedAt,
-		"ID":        vehicle.ID,
-		"IsOwner":   isLoggedIn,
+		"Name":             vehicle.Name,
+		"Package":          vehicle.Package,
+		"Username":         vehicle.User.Username,
+		"Process":          vehicle.Process,
+		"Contact":          vehicle.Contact,
+		"Plat":             vehicle.Plat,
+		"Date":             vehicle.Date,
+		"EnterTime":        vehicle.EnterTime,
+		"ID":               vehicle.ID,
+		"IsOwner":          isLoggedIn,
+		"EstimatedTime":    vehicle.EstimatedTime,
+		"FinishTime":       vehicle.FinishTime,
+		"ShowDeleteButton": false,
 	})
 }
 
@@ -174,9 +174,10 @@ func (h *VehicleHandler) UpdateVehicle(c *gin.Context) {
 
 		c.HTML(http.StatusOK, "edit.html", gin.H{
 			"ID":      vehicle.ID,
-			"Type":    vehicle.Type,
+			"Name":    vehicle.Name,
+			"Package": vehicle.Package,
 			"Contact": vehicle.Contact,
-			"Status":  vehicle.Status,
+			"Process": vehicle.Process,
 			"Plat":    vehicle.Plat,
 		})
 		return
@@ -187,9 +188,10 @@ func (h *VehicleHandler) UpdateVehicle(c *gin.Context) {
 	if err := c.ShouldBind(&updatedVehicle); err != nil {
 		c.HTML(http.StatusBadRequest, "edit.html", gin.H{
 			"Error":   err.Error(),
-			"Type":    updatedVehicle.Type,
+			"Name":    updatedVehicle.Name,
+			"Package": updatedVehicle.Package,
 			"Contact": updatedVehicle.Contact,
-			"Status":  updatedVehicle.Status,
+			"Process": updatedVehicle.Process,
 			"Plat":    updatedVehicle.Plat,
 		})
 		return
@@ -199,9 +201,10 @@ func (h *VehicleHandler) UpdateVehicle(c *gin.Context) {
 		c.HTML(http.StatusInternalServerError, "edit.html", gin.H{
 			"Error":   err.Error(),
 			"ID":      id,
-			"Type":    updatedVehicle.Type,
+			"Name":    updatedVehicle.Name,
+			"Package": updatedVehicle.Package,
 			"Contact": updatedVehicle.Contact,
-			"Status":  updatedVehicle.Status,
+			"Process": updatedVehicle.Process,
 			"Plat":    updatedVehicle.Plat,
 		})
 		return

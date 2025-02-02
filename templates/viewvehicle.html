@@ -1,14 +1,23 @@
 {{template "header.html" .}}
 <div class="bg-white p-8 rounded shadow-md">
-  <h1 class="text-3xl font-bold mb-4">{{.Type}}</h1>
+  <h1 class="text-3xl font-bold mb-4">{{.Name}}</h1>
   <div class="mb-4">
     <span class="font-semibold">Plat:</span> {{.Plat}}
   </div>
   <div class="mb-4">
-    <span class="font-semibold">Status:</span> {{.Status}}
+    <span class="font-semibold">Process:</span> {{.Process}}
   </div>
+  {{if or (eq .Process "Menunggu") (eq .Process "Proses")}}
+    <div class="mb-4">
+      <span class="font-semibold">Estimasi : </span>{{.EnterTime}} -> {{.EstimatedTime}}
+    </div>
+  {{else if eq .Process "Selesai"}}
+    <div class="mb-4">
+      <span class="font-semibold">Selesai : </span>{{.FinishTime}}
+    </div>
+  {{end}}
   <div class="mb-4">
-    <span class="font-semibold">Inputted:</span> {{.Username}}, {{.CreatedAt.Format "January 2 at 3:04 PM"}}
+    <span class="font-semibold">Input:</span> {{.Username}}, {{.Date}} at {{.EnterTime}}
   </div>  
   {{if .IsOwner}}
   <div class="mb-4">
@@ -19,11 +28,13 @@
     <a href="/vehicles/{{.ID}}/edit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
       Edit Vehicle
     </a>
+    {{if .ShowDeleteButton}}
     <form action="/vehicles/{{.ID}}/delete" method="POST" class="inline">
       <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
         Delete Vehicle
       </button>
     </form>
+    {{end}}
   </div>
   {{end}}
 </div>

@@ -11,25 +11,42 @@
     class="bg-red-500 text-white font-italic text-sm py-2 px-4 rounded focus:outline-none focus:shadow-outline"
     >{{.Error}}</p>
     {{end}}
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="type"
-      >Type</label
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="name"
+      >Name</label
     >
     <input
       type="text"
-      name="type"
+      name="name"
       required
       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
     />
   </div>
   <div class="mb-4">
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="status"
-      >Status</label
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="package"
+      >Package</label
     >
     <select
-      name="status"
+      name="package"
       required
       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
     >
+      <option value="Mobil">Mobil</option>
+      <option value="Motor">Motor</option>
+      <option value="Mobil Besar">Mobil Besar</option>
+      <option value="Motor Besar">Motor Besar</option>
+      <option value="Cuci Luar Mobil">Cuci Luar Mobil</option>
+    </select>
+  </div>
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="process"
+      >Process</label
+    >
+    <select
+      name="process"
+      required
+      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+    >
+      <option value="Menunggu">Menunggu</option>
       <option value="Proses">Proses</option>
       <option value="Selesai">Selesai</option>
     </select>

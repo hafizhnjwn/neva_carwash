@@ -6,8 +6,8 @@ import (
 	"nevacarwash.com/main/repositories"
 )
 
-type StatusVehicles struct {
-	Status   string                 // The status name (e.g., "Python", "Go").
+type ProcessVehicles struct {
+	Process   string                 // The status name (e.g., "Python", "Go").
 	Vehicles []repositories.Vehicle // The list of vehicles for this status.
 }
 
@@ -41,16 +41,16 @@ func (s *VehicleService) UpdateVehicle(id string, input repositories.CreateVehic
 	return s.repo.Update(id, &input)
 }
 
-func (s *VehicleService) GetVehiclesByStatus(statuss []string) ([]StatusVehicles, error) {
-	groupedVehicles := []StatusVehicles{}
+func (s *VehicleService) GetVehiclesByProcess(processes []string) ([]ProcessVehicles, error) {
+	groupedVehicles := []ProcessVehicles{}
 
-	for _, lang := range statuss {
-		vehicles, err := s.repo.FindByStatus(lang)
+	for _, process := range processes {
+		vehicles, err := s.repo.FindByProcess(process)
 		if err != nil {
 			return nil, err
 		}
-		groupedVehicles = append(groupedVehicles, StatusVehicles{
-			Status:   lang,
+		groupedVehicles = append(groupedVehicles, ProcessVehicles{
+			Process:   process,
 			Vehicles: vehicles,
 		})
 	}

@@ -13,28 +13,44 @@
       {{.Error}}
     </p>
     {{end}}
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="type"
-      >Type</label
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="name"
+      >Name</label
     >
     <input
       type="text"
-      name="type"
-      value="{{.Type}}"
+      name="name"
+      value="{{.Name}}"
       required
       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
     />
   </div>
   <div class="mb-4">
-    <label class="block text-gray-700 text-sm font-bold mb-2" for="status"
-      >Status</label
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="package"
+      >Package</label>
+    <select
+      name="package"
+      required
+      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
     >
-<select
-    name="status"
-    required
-    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
->
-    <option value="Proses" {{if eq .Status "Proses"}}selected{{end}}>Proses</option>
-    <option value="Selesai" {{if eq .Status "Selesai"}}selected{{end}}>Selesai</option>
+      <option value="Mobil" {{if eq .Package "Mobil"}}selected{{end}}>Mobil</option>
+      <option value="Motor" {{if eq .Package "Motor"}}selected{{end}}>Motor</option>
+      <option value="Mobil Besar" {{if eq .Package "Mobil Besar"}}selected{{end}}>Mobil Besar</option>
+      <option value="Motor Besar" {{if eq .Package "Motor Besar"}}selected{{end}}>Motor Besar</option>
+      <option value="Cuci Luar Mobil" {{if eq .Package "Cuci Luar Mobil"}}selected{{end}}>Cuci Luar Mobil</option>
+    </select>
+  </div>
+  <div class="mb-4">
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="process"
+      >Process</label
+    >
+    <select
+      name="process"
+      required
+      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+    >
+      <option value="Menunggu" {{if eq .Status "Menunggu"}}selected{{end}}>Menunggu</option>
+      <option value="Proses" {{if eq .Status "Proses"}}selected{{end}}>Proses</option>
+      <option value="Selesai" {{if eq .Status "Selesai"}}selected{{end}}>Selesai</option>
 </select>
   </div>
   <div class="mb-4">
