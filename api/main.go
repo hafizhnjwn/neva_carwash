@@ -1,10 +1,12 @@
 package main
 
 import (
+	"html/template"
 	"log"
-	"gorm.io/gorm"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"nevacarwash.com/main/database"
 	"nevacarwash.com/main/handlers"
 	"nevacarwash.com/main/middleware"
@@ -13,6 +15,10 @@ import (
 )
 
 var db *gorm.DB
+
+func contains(substring, str string) bool {
+	return strings.Contains(str, substring)
+}
 
 func init() {
 	database.LoadEnvs()
@@ -46,8 +52,10 @@ func main() {
 	router.Use(gin.Logger())
 
 	// Load HTML templates
+	router.SetFuncMap(template.FuncMap{
+		"contains": contains, // Now you can use {{contains}} in templates
+	})
 	router.LoadHTMLGlob("templates/*")
-
 	// Auth routes
 	auth := router.Group("/")
 	{
@@ -73,6 +81,11 @@ func main() {
 		snip.POST("/:id/edit", middleware.CheckAuth, vehicleHandler.UpdateVehicle)
 		snip.POST("/:id/delete", middleware.CheckAuth, vehicleHandler.DeleteVehicle)
 		snip.GET("/:id/delete", middleware.CheckAuth, vehicleHandler.DeleteVehicle)
+		snip.POST("/:id/selesai", middleware.CheckAuth, vehicleHandler.ChangeVehicleProcessToFinish)
+		snip.GET("/:id/selesai", middleware.CheckAuth, vehicleHandler.ChangeVehicleProcessToFinish)
+		snip.POST("/:id/proses", middleware.CheckAuth, vehicleHandler.ChangeVehicleProcessToWashing)
+		snip.GET("/:id/proses", middleware.CheckAuth, vehicleHandler.ChangeVehicleProcessToWashing)
+
 	}
 
 	// start server

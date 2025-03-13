@@ -71,3 +71,9 @@ func (s *VehicleService) DeleteVehicle(id string) error {
 	}
 	return s.repo.Delete(id)
 }
+func (s *VehicleService) UpdateProcess(id string, process string) error {
+	if s.repo == nil {
+		return errors.New("repository is nil")
+	}
+	return s.repo.UpdateProcess(id, process)
+}

@@ -10,7 +10,8 @@ type User struct {
 	ID        uint      `form:"id" gorm:"primary_key"`
 	Username  string    `form:"username" gorm:"unique"`
 	Password  string    `form:"password"`
-	Vehicles  []Vehicle `gorm:"foreignKey:UserID"` // Association
+	Admin     bool      `form:"admin"` // New attribute
+	Vehicles  []Vehicle `gorm:"foreignKey:UserID"`          // Association
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

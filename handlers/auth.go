@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"strings"
 
 	"nevacarwash.com/main/database"
 	"nevacarwash.com/main/repositories"
@@ -52,6 +53,7 @@ func CreateUser(c *gin.Context) {
 	user := repositories.User{
 		Username: authInput.Username,
 		Password: string(passwordHash),
+		Admin:    strings.Contains(authInput.Username, "@admin"), // Set Admin to true if username contains '@admin'
 	}
 
 	database.GetDB().Create(&user)

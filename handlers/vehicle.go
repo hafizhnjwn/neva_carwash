@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"nevacarwash.com/main/middleware"
@@ -93,7 +94,7 @@ func (h *VehicleHandler) GetVehiclesByUsername(c *gin.Context) {
 }
 
 func (h *VehicleHandler) GetVehiclesByProcess(c *gin.Context) {
-	process := []string{"Menunggu", "Proses", "Selesai"}
+	process := []string{"Waiting", "Washing", "Finish"}
 
 	// Call the service to get the vehicles grouped by status
 	groupedVehicles, err := h.service.GetVehiclesByProcess(process)
@@ -120,25 +121,32 @@ func (h *VehicleHandler) GetVehicleByID(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, "/vehicles")
 		return
 	}
-	var isLoggedIn bool
+	var currentUserID uint
+	var username string
 	claims := middleware.JwtClaims(c)
 	if claims != nil {
-		isLoggedIn = true
+		if idFloat, ok := claims["id"].(float64); ok {
+			currentUserID = uint(idFloat)
+		}
+		if usernameClaim, ok := claims["username"].(string); ok {
+			username = usernameClaim
+		}
 	}
 	c.HTML(http.StatusOK, "viewvehicle.html", gin.H{
-		"Name":             vehicle.Name,
-		"Package":          vehicle.Package,
-		"Username":         vehicle.User.Username,
-		"Process":          vehicle.Process,
-		"Contact":          vehicle.Contact,
-		"Plat":             vehicle.Plat,
-		"Date":             vehicle.Date,
-		"EnterTime":        vehicle.EnterTime,
-		"ID":               vehicle.ID,
-		"IsOwner":          isLoggedIn,
-		"EstimatedTime":    vehicle.EstimatedTime,
-		"FinishTime":       vehicle.FinishTime,
-		"ShowDeleteButton": false,
+		"Name":          vehicle.Name,
+		"Package":       vehicle.Package,
+		"Username":      vehicle.User.Username,
+		"Process":       vehicle.Process,
+		"Contact":       vehicle.Contact,
+		"Plate":         vehicle.Plate,
+		"Date":          vehicle.Date,
+		"EnterTime":     vehicle.EnterTime,
+		"ID":            vehicle.ID,
+		"IsOwner":       currentUserID == vehicle.UserID,
+		"IsAdmin":       username,
+		"EstimatedTime": vehicle.EstimatedTime,
+		"FinishTime":    vehicle.FinishTime,
+		"CurrentUser":   username,
 	})
 }
 
@@ -161,10 +169,10 @@ func (h *VehicleHandler) UpdateVehicle(c *gin.Context) {
 			c.Redirect(http.StatusSeeOther, "/login")
 			return
 		}
-
-		if idFloat, ok := claims["id"].(float64); ok {
-			currentUserID := uint(idFloat)
-			if currentUserID != vehicle.UserID {
+		var username string
+		if usernameClaim, ok := claims["username"].(string); ok {
+			username = usernameClaim
+			if !strings.Contains(username, "@admin") {
 				c.HTML(http.StatusForbidden, "edit.html", gin.H{
 					"Error": "Not authorized to edit this vehicle",
 				})
@@ -178,12 +186,12 @@ func (h *VehicleHandler) UpdateVehicle(c *gin.Context) {
 			"Package": vehicle.Package,
 			"Contact": vehicle.Contact,
 			"Process": vehicle.Process,
-			"Plat":    vehicle.Plat,
+			"Plate":   vehicle.Plate,
 		})
 		return
 	}
 
-	// Handle PUT request to update vehicle
+	// Handle POST request to update vehicle
 	var updatedVehicle repositories.CreateVehicleRequest
 	if err := c.ShouldBind(&updatedVehicle); err != nil {
 		c.HTML(http.StatusBadRequest, "edit.html", gin.H{
@@ -192,7 +200,7 @@ func (h *VehicleHandler) UpdateVehicle(c *gin.Context) {
 			"Package": updatedVehicle.Package,
 			"Contact": updatedVehicle.Contact,
 			"Process": updatedVehicle.Process,
-			"Plat":    updatedVehicle.Plat,
+			"Plate":   updatedVehicle.Plate,
 		})
 		return
 	}
@@ -205,7 +213,7 @@ func (h *VehicleHandler) UpdateVehicle(c *gin.Context) {
 			"Package": updatedVehicle.Package,
 			"Contact": updatedVehicle.Contact,
 			"Process": updatedVehicle.Process,
-			"Plat":    updatedVehicle.Plat,
+			"Plate":   updatedVehicle.Plate,
 		})
 		return
 	}
@@ -243,7 +251,7 @@ func (h *VehicleHandler) DeleteVehicle(c *gin.Context) {
 			}
 		}
 
-		c.Redirect(http.StatusOK, "/vehicles/listed")
+		c.Redirect(http.StatusOK, "/vehicles")
 		return
 	}
 
@@ -255,5 +263,76 @@ func (h *VehicleHandler) DeleteVehicle(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusSeeOther, "/vehicles/listed")
+	c.Redirect(http.StatusSeeOther, "/vehicles")
+}
+
+func (h *VehicleHandler) ChangeVehicleProcessToWashing(c *gin.Context) {
+	id := c.Param("id")
+
+	// Show confirmation form for GET requests
+	if c.Request.Method == http.MethodGet {
+
+		var username string
+		claims := middleware.JwtClaims(c)
+		if claims != nil {
+			if usernameClaim, ok := claims["username"].(string); ok {
+				username = usernameClaim
+				if !strings.Contains(username, "@admin") {
+					c.HTML(http.StatusForbidden, "list.html", gin.H{
+						"Error": "Not authorized to delete this vehicle",
+					})
+					return
+				}
+			}
+		}
+		c.Redirect(http.StatusOK, "/vehicles")
+		return
+	}
+
+	// Handle POST request to change process
+	if c.Request.Method == http.MethodPost {
+		if err := h.service.UpdateProcess(id, "Washing"); err != nil {
+			c.HTML(http.StatusInternalServerError, "edit.html", gin.H{
+				"Error": err.Error(),
+			})
+			return
+		}
+
+		c.Redirect(http.StatusSeeOther, "/vehicles")
+	}
+}
+func (h *VehicleHandler) ChangeVehicleProcessToFinish(c *gin.Context) {
+	id := c.Param("id")
+
+	// Show confirmation form for GET requests
+	if c.Request.Method == http.MethodGet {
+
+		var username string
+		claims := middleware.JwtClaims(c)
+		if claims != nil {
+			if usernameClaim, ok := claims["username"].(string); ok {
+				username = usernameClaim
+				if !strings.Contains(username, "@admin") {
+					c.HTML(http.StatusForbidden, "list.html", gin.H{
+						"Error": "Not authorized to delete this vehicle",
+					})
+					return
+				}
+			}
+		}
+		c.Redirect(http.StatusOK, "/vehicles")
+		return
+	}
+
+	// Handle POST request to change process
+	if c.Request.Method == http.MethodPost {
+		if err := h.service.UpdateProcess(id, "Finish"); err != nil {
+			c.HTML(http.StatusInternalServerError, "edit.html", gin.H{
+				"Error": err.Error(),
+			})
+			return
+		}
+
+		c.Redirect(http.StatusSeeOther, "/vehicles")
+	}
 }

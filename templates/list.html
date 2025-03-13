@@ -12,15 +12,15 @@
       {{range .Vehicles}}
       <div class="bg-white p-4 rounded shadow">
         <h2 class="text-xl font-semibold">No. Urut : {{.Queue}}</h2>
-        <p class="text-gray-600">Plat: {{.Plat}}</p>
+        <p class="text-gray-600">Plate: {{.Plate}}</p>
         <div class="flex justify-between items-center">
           <a href="/vehicles/{{.ID}}" class="text-blue-500 hover:text-blue-700 text-center">View</a>
           <div class="flex flex-col text-gray-500 text-sm space-y-1">
             <span>{{.User.Username}}</span>
-            {{if or (eq .Process "Menunggu") (eq .Process "Proses")}}
-              <span>Estimasi : {{.EstimatedTime}}</span>
-            {{else if eq .Process "Selesai"}}
-              <span>Selesai : {{.FinishTime}}</span>
+            {{if or (eq .Process "Waiting") (eq .Process "Washing")}}
+              <span>Estimation : {{.EstimatedTime}}</span>
+            {{else if eq .Process "Finish"}}
+              <span>Finish : {{.FinishTime}}</span>
             {{end}}
           </div>
         </div>
